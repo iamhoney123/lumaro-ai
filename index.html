@@ -1868,5 +1868,50 @@ render();
   </a>
 </section>
 
+<section id="lumaro-ai-chat" style="max-width:700px;margin:30px auto;padding:20px;background:#111827;color:white;border-radius:16px;font-family:Arial,sans-serif">
+  <h2>Ask Lumaro AI</h2>
+  <p>Ask a question or get help studying.</p>
+  <textarea id="lumaro-question" placeholder="Ask Lumaro anything..." style="box-sizing:border-box;width:100%;min-height:100px;padding:12px;border-radius:10px"></textarea>
+  <button id="lumaro-ask" style="margin-top:10px;padding:12px 18px;border:0;border-radius:8px;cursor:pointer">Ask Lumaro</button>
+  <p id="lumaro-status" role="status">Ready when you are.</p>
+  <div id="lumaro-answer" style="white-space:pre-wrap;line-height:1.6"></div>
+</section>
+
+<script>
+document.getElementById("lumaro-ask").addEventListener("click", async () => {
+  const questionBox = document.getElementById("lumaro-question");
+  const status = document.getElementById("lumaro-status");
+  const answerBox = document.getElementById("lumaro-answer");
+  const question = questionBox.value.trim();
+
+  if (!question) {
+    status.textContent = "Type a question first.";
+    return;
+  }
+
+  status.textContent = "Lumaro is thinking...";
+  answerBox.textContent = "";
+
+  try {
+    const response = await fetch("/.netlify/functions/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "The AI could not answer.");
+    }
+
+    answerBox.textContent = data.answer;
+    status.textContent = "Answered by Lumaro AI.";
+  } catch (error) {
+    status.textContent = "Couldn't get an answer: " + error.message;
+  }
+});
+</script>
+
 </body>
 </html>
